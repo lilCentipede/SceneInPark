@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Test2</title>
+		<meta charset="utf-8">
+		
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<script src="three.min.js"></script>
+		<script src="stats.min.js"></script>
+		<script src="WebGL.js"></script>
+		<script src="vax.js"></script>
+		<script src="StereoEffect.js"></script>
+		<script src="myScene.js"></script>
+	</head>
+	
+	<body>
+		<script>
+			//В myScene.js са дефинирани функции, с които създавам сцената
+			//Моделът не спазва законите на физиката! Направен е по вкуса на създателя
+			vaxInitParallax( -1 );
+			
+			scene.background= new THREE.Color(0x000030);
+			renderer.shadowMap.enabled = true;
+			camera.position.set(0,40,90);		
+			camera.lookAt( 0,0,0 );
+			
+			var moon = makeMoon();
+			moon.position.set(80,40,-90);
+			scene.add(moon);
+			
+			scene.remove(light);
+			var moonlight = new THREE.PointLight(0xffffff, 0.9);
+			moonlight.castShadow = true;
+			moonlight.position.set(75,50,-50);
+			moonlight.shadow.mapSize.width = 2048;
+			moonlight.shadow.mapSize.height = 2048;
+			moonlight.intensity = 1.4;
+			scene.add(moonlight);
+
+			var ground = makeGround();
+			scene.add( ground );
+			
+			//benches
+			for(var i =0;i< 4;i++){
+			var bench = makeBench();
+			bench.position.x = 32;
+			bench.position.z = -40 + i*26; 
+			scene.add(bench);
+			}
+			
+			//trees
+			var trees = [];
+			trees[0] = makeTree();
+			trees[0].position.set(-15,6,-25);
+			scene.add(trees[0]);
+
+			trees[1] = makeTree();
+			trees[1].position.set(-5,6,-15);
+			scene.add(trees[1]);
+
+			trees[2] = makeTree();
+			trees[2].position.set(-20,6,32);
+			scene.add(trees[2]);
+
+			//bicycle
+			var bicycle = makeBicycleBase();
+			
+				var wheel = new THREE.Group();
+				wheel.scale.set( 0.17, 0.17, 0.2 );
+				var geometry = new THREE.TorusGeometry( 60, 5, 9, 8 );
+				for (var i=0; i<9; i++)
+				{
+					var prot = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color:'gray'}) );
+					prot.rotation.set( 0, 0, 2*Math.PI/8*i/9 );
+					prot.receiveShadow = true;
+					prot.castShadow = true;
+					wheel.add( prot );
+				}
+				for(var i =0;i<6;i++){
+					var pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,120,32),new THREE.MeshLambertMaterial({color:'gray'}));
+					pipe.rotation.z = i*Math.PI/6;
+					pipe.receiveShadow = true;
+					pipe.castShadow = true;
+					wheel.add( pipe );
+				}
+				var wheel2 = wheel.clone();
+				wheel.position.set(-15,0,-1.55);
+				wheel2.position.set(27,0,-1.55);
+				bicycle.add( wheel);
+				bicycle.add(wheel2);
+
+			bicycle.scale.set(0.25,0.25,0.25);
+			bicycle.position.set(-18,0,30);
+			bicycle.rotation.set(Math.PI/12,-Math.PI/4,0);
+			scene.add(bicycle);
+			
+			//тази част от кода със звездите е взета от пример S0309-urban-planet и е леко модифицирана
+			var starGeometry = new THREE.PlaneGeometry( 1, 1 );
+			var starMaterial = new THREE.MeshBasicMaterial( );
+			var stars = [];
+			for (var i=0; i<500; i++)
+			{
+				var scale = 2+1*Math.sin(i);
+				stars[i] = new THREE.Mesh( starGeometry, starMaterial );
+				stars[i].position.set( THREE.Math.randFloatSpread(2000), THREE.Math.randFloatSpread(1000), -460 );
+				stars[i].scale.set( 1.1*scale, 1.1*scale, 1.1*scale );
+				scene.add( stars[i] );
+			}
+
+			function animate()
+			{
+				var i = Math.round(50*t);
+				stars[ i%stars.length ].visible = true;
+				i += 2;
+				stars[ i%stars.length ].visible = false;
+				wheel.rotation.set(0,0,t/2);
+				wheel2.rotation.set(0,0,t/2);
+				moon.position.set(90*Math.sin(t/20),50,-90*Math.cos(t/20));
+				moonlight.position.set(80*Math.sin(t/20),50,-80*Math.cos(t/20));
+			}
+		</script>
+	</body>
+</html>
+
+
